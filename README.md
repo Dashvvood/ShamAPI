@@ -1,2 +1,2 @@
 # ShamAPI
-Blueprint a Sham. Build the Architecture.
+A sham plan, a true span.
