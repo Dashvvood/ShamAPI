@@ -1,0 +1,19 @@
+app:
+  name: rtmlib
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1
+  reload: True
+
+model:
+  device: "cuda"  # cpu, cuda, mps
+  backend: "onnxruntime"  # opencv, onnxruntime, openvino
+  to_openpose: False
+  mode: 'performance'  # 'performance', 'lightweight', 'balanced'. Default: 'balanced'
+
+log:
+  level: "INFO"
+  sink: "logs/rtmlib.log"
+  rotation: "100 MB"
+  retention: "7 days"
+
