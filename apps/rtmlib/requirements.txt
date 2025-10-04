@@ -10,3 +10,8 @@ Pillow
 gunicorn
 uvicorn
 requests
+elinor
+omegaconf
+loguru
+python-multipart
+concurrent-log-handler

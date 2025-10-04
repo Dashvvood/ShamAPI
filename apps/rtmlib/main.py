@@ -11,8 +11,11 @@ from loguru import logger
 import uvicorn
 
 o_d = elinor.o_d()
-config = OmegaConf.load("config/default.yaml")
+config = OmegaConf.load("./config/default.yaml")
 logger.add(**config["log"])
+logger.info(f"Config: {config}")
+
+
 model = Wholebody(**config["model"])
 app = FastAPI(title="HPE", version=0.1)
 
@@ -39,6 +42,4 @@ if __name__ == "__main__":
         app, 
         host=config["app"]["host"], 
         port=config["app"]["port"],
-        # workers=config["app"]["workers"],
-        # reload=config["app"]["reload"]
     )

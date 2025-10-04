@@ -5,8 +5,10 @@ import uuid
 from rtmlib import draw_skeleton
 import cv2
 import numpy as np
+import asyncio  
 
-def client(filepath, url="http://127.0.0.1:8000/predict"):
+
+async def client(filepath, url="http://127.0.0.1:8000/predict"):
     files = {"file":  open(filepath, "rb")}
     data = {"RequestID": uuid.uuid4().hex}
     response = requests.post(url, data=data, files=files)
@@ -18,7 +20,7 @@ def client(filepath, url="http://127.0.0.1:8000/predict"):
     return result, img
 
 if __name__ == "__main__":
-    result, img = client("./data/example01.jpg")
+    result, img = asyncio.run(client("./data/example01.jpg"))
     print(result)
     cv2.imshow("Result", img)
     cv2.waitKey(0)
