@@ -6,7 +6,6 @@ app:
   port: 8000
   workers: 1
   reload: True
-# esac
 
 model:
   device: "cuda"  # cpu, cuda, mps

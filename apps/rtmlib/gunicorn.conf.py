@@ -1,7 +1,8 @@
 # RTFM -> http://docs.gunicorn.org/en/latest/settings.html#settings
 import os
-worker_class = "uvicorn.workers.UvicornWorker"
 
+pidfile = 'app.pid'
+worker_class = "uvicorn.workers.UvicornWorker"
 bind = '0.0.0.0:8000'
 workers = 2
 timeout = 2000

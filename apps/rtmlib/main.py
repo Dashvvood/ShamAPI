@@ -1,45 +1,46 @@
-import os
 import elinor
-# 环境变量
 DOTENV = elinor.fast_loadenv_then_append_path()
-from fastapi import FastAPI, UploadFile, File, Form
+
+from fastapi import (
+    FastAPI, 
+    UploadFile, 
+    File, Form,
+)
+
+import time
 import cv2
 import numpy as np
-from rtmlib import Wholebody
 from omegaconf import OmegaConf
 from loguru import logger
-import uvicorn
+from rtmlib import Wholebody
+import asyncio
 
 o_d = elinor.o_d()
-config = OmegaConf.load("./config/default.yaml")
+config = OmegaConf.load("./config.yaml")
 logger.add(**config["log"])
-logger.info(f"Config: {config}")
-
 
 model = Wholebody(**config["model"])
 app = FastAPI(title="HPE", version=0.1)
 
-@app.get("/")
+@app.get("/")  # 明确设置状态码为200
 async def index():
-    return config
+    return {
+        "config": OmegaConf.to_container(config, resolve=True)
+    }
 
 @app.post("/predict")
-async def predict(RequestID: str = Form(...), file: UploadFile = File(...)):
-    logger.info(f"RequestID: {RequestID}, filename: {file.filename}, content_type: {file.content_type}")
+async def predict(file: UploadFile=File(...)):
+    tic = time.time()
     contents = await file.read()
     img = cv2.imdecode(np.frombuffer(contents, np.uint8), cv2.IMREAD_COLOR)
     keypoints, scores = model(img)
+    toc = time.time()
+    processed_time = round(toc - tic, 4)
+    logger.info(f"ProcessedTime: {processed_time}s")
     return {
-        "RequestID": RequestID,
+        "ProcessedTime": processed_time,
         "ModelOutput": {
             "keypoints": keypoints.tolist(),
             "scores": scores.tolist()
         }
     }
-
-if __name__ == "__main__":
-    uvicorn.run(
-        app, 
-        host=config["app"]["host"], 
-        port=config["app"]["port"],
-    )
