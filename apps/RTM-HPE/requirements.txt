@@ -1,0 +1,22 @@
+elinor
+
+tqdm
+numpy
+Pillow
+rtmlib
+ipykernel
+onnxruntime-gpu
+
+fastapi
+gunicorn
+uvicorn
+requests
+
+loguru
+omegaconf
+concurrent-log-handler
+opencv-python
+opencv-contrib-python
+
+# python-multipart
+
