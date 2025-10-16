@@ -5,12 +5,14 @@ import time
 import numpy as np
 from omegaconf import OmegaConf
 from loguru import logger
+logger.remove()
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from typing import Dict, Any
 from rtmlib import Wholebody
 
 from utils.vision_process import fetch_image
+from utils.api_process import get_client_info
 
 import cv2
 
@@ -21,33 +23,24 @@ logger.add(**config["log"])
 model = Wholebody(**config["model"])
 app = FastAPI(title="HPE", version=0.1)
 
+
+
+
 @app.get("/")  
-async def index():
+async def index(client_info: Dict = Depends(get_client_info)):
     logger.info("Index page accessed")
     return {
         "pid": os.getpid(),
         "config": OmegaConf.to_container(config, resolve=True),
+        "client_info": client_info
     }
 
-# @app.post("/predict")
-# async def predict(file: UploadFile=File(...)):
-#     tic = time.time()
-#     contents = await file.read()
-#     img = cv2.imdecode(np.frombuffer(contents, np.uint8), cv2.IMREAD_COLOR)
-#     keypoints, scores = model(img)
-#     toc = time.time()
-#     processed_time = round(toc - tic, 4)
-#     logger.info(f"ProcessedTime: {processed_time}s")
-#     return {
-#         "ProcessedTime": processed_time,
-#         "ModelOutput": {
-#             "keypoints": keypoints.tolist(),
-#             "scores": scores.tolist()
-#         }
-#     }
 
 @app.post("/predict")
-async def predict(message: Dict):
+async def predict(
+    message: Dict,
+    client_info: Dict = Depends(get_client_info)
+):
     """
     message = {
         "image": "https://example.com/image.jpg"
@@ -60,13 +53,11 @@ async def predict(message: Dict):
     keypoints, scores = model(img)
     toc = time.time()
     processed_time = round(toc - tic, 4)
-    logger.info(f"Processed Time: {processed_time}s")
+    logger.info(f"IP: {client_info['ip']}; Time: {processed_time}s")
     return {
         "processed_time": processed_time,
         "model_output": {
             "keypoints": keypoints.tolist(),
             "scores": scores.tolist()
-        }
+        }   
     }
-
-
