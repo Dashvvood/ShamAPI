@@ -1,11 +1,9 @@
 elinor
 
 tqdm
-numpy
-Pillow
 rtmlib
 ipykernel
-onnxruntime-gpu==1.20.0
+onnxruntime-gpu==1.22.0
 
 fastapi
 gunicorn
@@ -17,6 +15,3 @@ omegaconf
 concurrent-log-handler
 opencv-python
 opencv-contrib-python
-
-# python-multipart
-
