@@ -28,7 +28,7 @@ app = FastAPI(title="HPE", version=0.1)
 
 @app.get("/")  
 async def index(client_info: Dict = Depends(get_client_info)):
-    logger.info("Index page accessed")
+    logger.info(f"IP: {client_info['ip']}")
     return {
         "pid": os.getpid(),
         "worker_id": os.environ["APP_WORKER_ID"],
