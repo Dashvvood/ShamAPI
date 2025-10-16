@@ -5,7 +5,7 @@ numpy
 Pillow
 rtmlib
 ipykernel
-onnxruntime-gpu
+onnxruntime-gpu==1.20.0
 
 fastapi
 gunicorn
