@@ -31,6 +31,7 @@ async def index(client_info: Dict = Depends(get_client_info)):
     logger.info("Index page accessed")
     return {
         "pid": os.getpid(),
+        "worker_id": os.environ["APP_WORKER_ID"],
         "config": OmegaConf.to_container(config, resolve=True),
         "client_info": client_info
     }

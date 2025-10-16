@@ -14,5 +14,6 @@ aiohttp
 loguru
 omegaconf
 concurrent-log-handler
+pillow
 opencv-python
 opencv-contrib-python
