@@ -1,0 +1,29 @@
+# custom
+elinor
+#  jupyter
+ipykernel
+ipywidgets
+
+# file
+pyyaml
+omegaconf
+loguru
+
+# deep learning
+qwen_vl_utils
+qwen-omni-utils
+transformers
+accelerate
+vllm
+torch
+torchvision
+
+# web
+fastapi
+uvicorn
+gunicorn
+requests
+aiohttp
+
+librosa
+soundfile
