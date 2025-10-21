@@ -22,8 +22,8 @@ max_mem["cpu"] = "48GiB"  # 兜底
 #视频切分
 import subprocess,shlex
 #把视频裁成很轻量（12s / 10FPS / 336p / 去音轨）
-SRC = "/GPFS/data/xingranquan/download/testvideo1.mp4"
-CLIP = "/GPFS/data/xingranquan/tmp/clips/clip_12s_10fps_336.mp4"
+SRC = "XXX.mp4"
+CLIP = "YYY.mp4"
 subprocess.run(shlex.split(
     f'ffmpeg -y -i "{SRC}" -t 12 -vf "fps=10,scale=-2:336" -an "{CLIP}"'
 ), check=True)
@@ -34,7 +34,7 @@ subprocess.run(shlex.split(
 
 
 # use local model
-model_dir="/GPFS/public/Qwen2.5-Omni"
+model_dir="ZZZ/Qwen2.5-Omni"
 # default: Load the model on the available device(s)
 model = Qwen2_5OmniForConditionalGeneration.from_pretrained(model_dir, torch_dtype=torch.bfloat16, device_map="auto", max_memory = max_mem, offload_folder="/GPFS/data/xingranquan/tmp/offload")
 #这里的offload是在设置device_map="auto"且max_memory后，用于临时存放切下来后剩余的权重的。
