@@ -4,7 +4,6 @@ cat >> ${PROJECT_ROOT}/.env << EOF
 PROJECT_ROOT=${PROJECT_ROOT}
 EOF
 
-
 function link_dirs() {
     local app_root=$1
     shift  # 移除第一个参数
@@ -16,7 +15,7 @@ function link_dirs() {
             echo "Skipping ${source} → ${target}"
         else
             echo "Create ${source} → ${target}"
-            ln -s "${source}" "${target}"
+            ln -sr "${source}" "${target}"
         fi
     done
 }
@@ -36,7 +35,7 @@ N=0
 while IFS= read -r APP_ROOT; do
     APP_NAME=$(basename "${APP_ROOT}")
     dump_env "${APP_ROOT}" "${APP_NAME}"
-    link_dirs "${APP_ROOT}" "cache" "data"
+    link_dirs "${APP_ROOT}" "cache" "data" "log"
     ((N++))
 done < <(find ${PROJECT_ROOT}/apps -maxdepth 1 -mindepth 1 -type d)
 
