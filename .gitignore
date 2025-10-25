@@ -211,3 +211,6 @@ log/
 
 *.ipynb
 app.pidvenv/
+
+cache/*
+!cache/.gitkeep
