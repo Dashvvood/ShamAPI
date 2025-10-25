@@ -214,3 +214,6 @@ app.pidvenv/
 
 cache/*
 !cache/.gitkeep
+
+log/*
+!log/.gitkeep

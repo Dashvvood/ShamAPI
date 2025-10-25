@@ -14,7 +14,7 @@ function link_dirs() {
         if [ -L "${target}" ] || [ -e "${target}" ]; then
             echo "Skipping ${source} → ${target}"
         else
-            echo "Create ${source} → ${target}"
+            echo "Create ${target} → ${source}"
             ln -sr "${source}" "${target}"
         fi
     done
