@@ -1,0 +1,16 @@
+elinor
+
+tqdm
+ipykernel
+whisperx
+librosa
+audioread
+
+fastapi
+gunicorn
+uvicorn
+requests
+
+loguru
+omegaconf
+concurrent-log-handler
