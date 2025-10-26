@@ -23,12 +23,13 @@ app = FastAPI(title="Qwen2.5-Omni", version=0.1)
 
 model_dir = "./model/Qwen2.5-Omni-3B"
 model = Qwen2_5OmniForConditionalGeneration.from_pretrained(
-    model_dir=config["model"]["model_dir"],
+    config["model"]["model_dir"],
     device_map=config["model"]["device_map"],
     torch_dtype=getattr(torch, config["model"]["torch_type"])
 )
 processor = Qwen2_5OmniProcessor.from_pretrained(config["model"]["model_dir"])
 
+logger.info("Model and Processor loaded.")
 
 @app.get("/")  
 async def index(client_info: Dict = Depends(get_client_info)):
