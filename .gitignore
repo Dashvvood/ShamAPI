@@ -215,3 +215,7 @@ cache/*
 
 log/*
 !log/.gitkeep
+app.pid
+
+venv/
+.venv

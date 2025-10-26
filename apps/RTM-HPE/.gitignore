@@ -1,6 +1,2 @@
-logs/
-log/
-*.ipynb
-data/
-*.venv
-app.pid
+/config.yaml
+/gunicorn.conf.py
