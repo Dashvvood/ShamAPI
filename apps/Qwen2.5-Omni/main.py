@@ -9,10 +9,8 @@ logger.remove()
 
 from fastapi import FastAPI, Depends
 from typing import Dict, Any
-from rtmlib import Wholebody
 
 import torch
-import soundfile as sf
 from transformers import Qwen2_5OmniForConditionalGeneration, Qwen2_5OmniProcessor
 from utils.api_process import get_client_info
 from qwen_omni_utils import process_mm_info
