@@ -41,7 +41,6 @@ async def index(client_info: Dict = Depends(get_client_info)):
         "client_info": client_info
     }
 
-
 @app.post("/chat")
 async def chat(
     message: Dict,
@@ -69,26 +68,35 @@ async def chat(
             ],
         }
     """
-    tic = time.time()
-    conversation = message["conversation"]
-    USE_AUDIO_IN_VIDEO = message.get("use_audio_in_video", False)
+    try:
+        tic = time.time()
+        conversation = message["conversation"]
+        USE_AUDIO_IN_VIDEO = message.get("use_audio_in_video", False)
 
-    text = processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
-    audios, images, videos = process_mm_info(conversation, use_audio_in_video=USE_AUDIO_IN_VIDEO)
-    inputs = processor(text=text, audio=audios, images=images, videos=videos, return_tensors="pt", padding=True, use_audio_in_video=USE_AUDIO_IN_VIDEO)
-    inputs = inputs.to(model.device).to(model.dtype)
-    # Inference: Generation of the output text and audio
-    text_ids = model.generate(**inputs, use_audio_in_video=USE_AUDIO_IN_VIDEO, return_audio=False)
-    text = processor.batch_decode(text_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+        text = processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
+        audios, images, videos = process_mm_info(conversation, use_audio_in_video=USE_AUDIO_IN_VIDEO)
+        inputs = processor(text=text, audio=audios, images=images, videos=videos, return_tensors="pt", padding=True, use_audio_in_video=USE_AUDIO_IN_VIDEO)
+        inputs = inputs.to(model.device).to(model.dtype)
+        # Inference: Generation of the output text and audio
+        text_ids = model.generate(**inputs, use_audio_in_video=USE_AUDIO_IN_VIDEO, return_audio=False)
+        text = processor.batch_decode(text_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
 
-    toc = time.time()
-    processed_time = round(toc - tic, 4)
-    logger.info(f"IP: {client_info['ip']}; Time: {processed_time}s")
+        toc = time.time()
+        processed_time = round(toc - tic, 4)
+        logger.info(f"IP: {client_info['ip']}; Time: {processed_time}s")
+        res = {
+            "api": "/chat",
+            "model_output": {
+                "text": text
+            },
+            "processed_time": processed_time,
+        }
+
+    except Exception as e:
+        logger.error(f"Error processing request from IP {client_info['ip']}: {e}")
+        res = {
+            "api": "/chat",
+            "error": str(e),
+        }
+    return res
     
-    return {
-        "api": "/chat",
-        "model_output": {
-            "text": text
-        },
-        "processed_time": processed_time,
-    }
