@@ -1,4 +1,4 @@
-vllm serve model/Qwen2.5-VL-3B-Instruct \
+vllm serve model/Qwen2.5-Omni-3B \
 --trust-remote-code \
 --host 0.0.0.0 \
 --port 17702 \
