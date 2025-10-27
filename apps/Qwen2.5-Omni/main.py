@@ -1,6 +1,10 @@
 import elinor
 DOTENV = elinor.fast_loadenv_then_append_path(keys=["PROJECT_ROOT"])
 import os
+gpu_ids = os.environ["CUDA_VISIBLE_DEVICES"].split(",")
+print(f"{gpu_ids = }")
+os.environ["CUDA_VISIBLE_DEVICES"] = gpu_ids[int(os.environ["APP_WORKER_ID"]) - 1]
+
 import time
 import numpy as np
 from omegaconf import OmegaConf
