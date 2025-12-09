@@ -10,13 +10,12 @@ app:
 model:
   name: "large-v3-turbo"
   device: "cuda"
-  download_root: "cache/"
+  download_root: "cache/"  # relative to PROJECT_ROOT
   in_memory: False
-
 
 log:
   level: "INFO"
-  sink: "log/whisper.log"
+  sink: "log/whisper.log"  # relative to PROJECT_ROOT
   rotation: "10 MB"
   retention: "7 days"
   encoding : "utf-8"

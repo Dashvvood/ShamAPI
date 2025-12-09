@@ -1,5 +1,5 @@
-from .. import PROJECT_ROOT
-from loguru import logger;logger.remove()
+from .. import WHISPER_CONFIG_PATH
+from loguru import logger;logger.remove();
 
 import os
 import time
@@ -11,13 +11,11 @@ from fastapi import FastAPI, Depends
 from utils.api_process import get_client_info
 from utils.audio_process import process_audio_info
 
-
-config = OmegaConf.load(os.path.join(PROJECT_ROOT, "config/whisper.yaml"))
+config = OmegaConf.load(WHISPER_CONFIG_PATH)
 logger.add(**config["log"])
-
 model = whisper.load_model(**config["model"])
 app = FastAPI(title="whisper", version=0.1)
-logger.info("Model loaded.")
+logger.info(f"Model loaded {type(model)}")
 
 
 @app.get("/")
@@ -67,3 +65,8 @@ async def transcribe(
         "processed_time": processed_time,
         "model_output": result
     }
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host=config["app"]["host"], port=config["app"]["port"])

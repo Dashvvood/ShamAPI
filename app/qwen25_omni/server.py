@@ -1,4 +1,4 @@
-from .. import PROJECT_ROOT
+from .. import QWEN25_OMNI_CONFIG_PATH
 from loguru import logger;logger.remove()
 
 import os
@@ -10,7 +10,6 @@ import time
 import numpy as np
 from omegaconf import OmegaConf
 
-
 from fastapi import FastAPI, Depends
 from typing import Dict, Any
 
@@ -19,16 +18,14 @@ from transformers import Qwen2_5OmniForConditionalGeneration, Qwen2_5OmniProcess
 from utils.api_process import get_client_info
 from qwen_omni_utils import process_mm_info
 
-config = OmegaConf.load(os.path.join(PROJECT_ROOT, "config/qwen25_omni.yaml"))
+config = OmegaConf.load(QWEN25_OMNI_CONFIG_PATH)
 logger.add(**config["log"])
-
-app = FastAPI(title="Qwen2.5-Omni", version=0.1)
 
 model_dir = config["model"]["model_dir"]
 if not os.path.exists(model_dir):
     # Load model directly
     from huggingface_hub import snapshot_download
-    snapshot_download(repo_id="Qwen/Qwen2.5-Omni-3B", local_dir=model_dir)
+    snapshot_download(repo_id=config["model"]["repo_id"], local_dir=model_dir)
 
 model = Qwen2_5OmniForConditionalGeneration.from_pretrained(
     config["model"]["model_dir"],
@@ -38,6 +35,7 @@ model = Qwen2_5OmniForConditionalGeneration.from_pretrained(
 
 processor = Qwen2_5OmniProcessor.from_pretrained(config["model"]["model_dir"])
 
+app = FastAPI(title="Qwen2.5-Omni", version=0.1)
 logger.info("Model and Processor loaded.")
 
 @app.get("/")  
@@ -110,3 +108,7 @@ async def chat(
         }
     return res
     
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host=config["app"]["host"], port=config["app"]["port"])

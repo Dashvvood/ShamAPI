@@ -11,7 +11,8 @@ import numpy as np
 from fastapi import HTTPException
 from loguru import logger
 from PIL import Image
-from moviepy import VideoFileClip
+from moviepy.editor import VideoFileClip
+
 
 def to_rgb(pil_image: Image.Image) -> Image.Image:
       if pil_image.mode == 'RGBA':

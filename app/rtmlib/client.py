@@ -1,3 +1,6 @@
+from .. import PROJECT_ROOT
+from elinor import o_d; o_d = o_d()
+
 import requests
 from PIL import Image
 from elinor.cv import pil_to_b64
@@ -62,10 +65,8 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input", type=str, default="./data/dummy/image01.jpg", help="Path to input audio file.")
     parser.add_argument("--url", type=str, default="http://127.0.0.1:8000/image", help="URL of the transcription service.")
     args = parser.parse_args()
-    path = args.input
-    url = args.url
 
-    img = Image.open(path)
+    img = Image.open(args.input)
     img_code = pil_to_b64(img)
 
     message = {
@@ -74,16 +75,15 @@ if __name__ == "__main__":
     messages = [message] * 10
 
     # 同步请求
-    responses = send_request_sync(url, messages)
+    responses = send_request_sync(args.url, messages)
     for data in responses[:3]:
         keypoints = np.array(data["model_output"]["keypoints"])
         scores = np.array(data["model_output"]["scores"])
         print(f"{keypoints.shape = }, {scores.shape = }")
 
     
-    
     # 异步请求
-    responses = asyncio.run(send_request_async(url, messages, max_concurrent=10))
+    responses = asyncio.run(send_request_async(args.url, messages, max_concurrent=10))
     for data in responses[:3]:
         keypoints = np.array(data["model_output"]["keypoints"])
         scores = np.array(data["model_output"]["scores"])

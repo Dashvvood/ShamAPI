@@ -1,39 +1,41 @@
-import elinor
-DOTENV = elinor.fast_loadenv_then_append_path(keys=["PROJECT_ROOT"])
-import os
-gpu_ids = os.environ["CUDA_VISIBLE_DEVICES"].split(",")
-print(f"{gpu_ids = }")
-os.environ["CUDA_VISIBLE_DEVICES"] = gpu_ids[int(os.environ["APP_WORKER_ID"]) - 1]
+from .. import QWEN3_VL_CONFIG_PATH
+from loguru import logger;logger.remove()
 
+
+import os
 import time
 import numpy as np
 from omegaconf import OmegaConf
-from loguru import logger
-logger.remove()
 
 from fastapi import FastAPI, Depends
 from typing import Dict, Any
 
 import torch
-from transformers import Qwen2_5OmniForConditionalGeneration, Qwen2_5OmniProcessor
-from utils.api_process import get_client_info
-from qwen_omni_utils import process_mm_info
+from transformers import Qwen3VLForConditionalGeneration, AutoProcessor
 
-o_d = elinor.o_d()
-config = OmegaConf.load("./config.yaml")
+from utils.api_process import get_client_info
+from qwen_vl_utils import process_vision_info
+
+config = OmegaConf.load(QWEN3_VL_CONFIG_PATH)
 logger.add(**config["log"])
 
-app = FastAPI(title="Qwen2.5-Omni", version=0.1)
+model_dir = config["model"]["model_dir"]
+if not os.path.exists(model_dir):
+    # Load model directly
+    from huggingface_hub import snapshot_download
+    snapshot_download(repo_id=config["model"]["repo_id"], local_dir=model_dir)
 
-model_dir = "./model/Qwen2.5-Omni-3B"
-model = Qwen2_5OmniForConditionalGeneration.from_pretrained(
+model = Qwen3VLForConditionalGeneration.from_pretrained(
     config["model"]["model_dir"],
     device_map=config["model"]["device_map"],
     torch_dtype=getattr(torch, config["model"]["torch_type"])
 )
-processor = Qwen2_5OmniProcessor.from_pretrained(config["model"]["model_dir"])
+processor = AutoProcessor.from_pretrained(config["model"]["model_dir"])
 
+
+app = FastAPI(title="Qwen3-VL", version=0.1)
 logger.info("Model and Processor loaded.")
+
 
 @app.get("/")  
 async def index(client_info: Dict = Depends(get_client_info)):
@@ -44,6 +46,7 @@ async def index(client_info: Dict = Depends(get_client_info)):
         "config": OmegaConf.to_container(config, resolve=True),
         "client_info": client_info
     }
+
 
 @app.post("/chat")
 async def chat(
@@ -71,27 +74,39 @@ async def chat(
                 {"type": "text", "text": "你看到了什么?"},
             ],
         }
+    ]
     """
     try:
         tic = time.time()
         conversation = message["conversation"]
-        USE_AUDIO_IN_VIDEO = message.get("use_audio_in_video", False)
+        text = processor.apply_chat_template(conversation, tokenize=False, add_generation_prompt=True)
+        image_inputs, video_inputs, video_kwargs = process_vision_info([conversation], return_video_kwargs=True,
+                                                                image_patch_size= 16,
+                                                                return_video_metadata=True)
+        if video_inputs is not None:
+            video_inputs, video_metadatas = zip(*video_inputs)
+            video_inputs, video_metadatas = list(video_inputs), list(video_metadatas)
+        else:
+            video_metadatas = None
+        inputs = processor(text=[text], images=image_inputs, videos=video_inputs, video_metadata=video_metadatas, **video_kwargs, do_resize=False, return_tensors="pt")
+        inputs = inputs.to(model.device)
 
-        text = processor.apply_chat_template(conversation, add_generation_prompt=True, tokenize=False)
-        audios, images, videos = process_mm_info(conversation, use_audio_in_video=USE_AUDIO_IN_VIDEO)
-        inputs = processor(text=text, audio=audios, images=images, videos=videos, return_tensors="pt", padding=True, use_audio_in_video=USE_AUDIO_IN_VIDEO)
-        inputs = inputs.to(model.device).to(model.dtype)
-        # Inference: Generation of the output text and audio
-        text_ids = model.generate(**inputs, use_audio_in_video=USE_AUDIO_IN_VIDEO, return_audio=False)
-        text = processor.batch_decode(text_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)
-
+        generated_ids = model.generate(**inputs, max_new_tokens=128) # do_sample = T or F?
+        generated_ids_trimmed = [
+            out_ids[len(in_ids) :] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+        ]
+        output_text = processor.batch_decode(
+            generated_ids_trimmed, 
+            skip_special_tokens=True, 
+            clean_up_tokenization_spaces=False
+        )
         toc = time.time()
         processed_time = round(toc - tic, 4)
         logger.info(f"IP: {client_info['ip']}; Time: {processed_time}s")
         res = {
             "api": "/chat",
             "model_output": {
-                "text": text
+                "text": output_text[0]
             },
             "processed_time": processed_time,
         }

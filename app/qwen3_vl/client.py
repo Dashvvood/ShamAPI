@@ -21,13 +21,21 @@ message = {
         {
             "role": "system",
             "content": [
-                {"type": "text", "text": "You are Qwen, a virtual human developed by the Qwen Team, Alibaba Group, capable of perceiving auditory and visual inputs, as well as generating text and speech."}
+                {"type": "text", 
+                 "text": "你是一个有帮助的助手。"
+                },
             ],
         },
         {
             "role": "user",
             "content": [
-                {"type": "image", "image": f"{args.input}"},
+                # {"type": "image", "image": f"{args.input}"},
+                {
+                    "type": "video", 
+                    "video": f"{args.input}",
+                    "video_start": 0.0,
+                    "video_end": 5.0,
+                },
                 {"type": "text", "text": "你看到了什么?"},
             ],
         }
@@ -39,12 +47,12 @@ response = requests.post(args.url, json=message)
 output_path = os.path.join(
     PROJECT_ROOT, 
     "output", 
-    f"qwen25_omni_{o_d.strftime("%Y%m%d-%H%M%S")}.json"
+    f"qwen3_vl_{o_d.strftime("%Y%m%d-%H%M%S")}.json"
 )
 
 with open(output_path, "w") as f:
-    json.dump(response.json(), f, indent=4)
+    json.dump(response.json(), f, indent=4, ensure_ascii=False)
 
-print(response.json().keys())
 print(response.json())
+print(response.json().keys())
 print(f"Result saved to {output_path}")

@@ -219,3 +219,5 @@ app.pid
 
 venv/
 .venv
+
+output/

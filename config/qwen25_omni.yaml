@@ -8,6 +8,7 @@ app:
   reload: True
 
 model:
+  repo_id: "Qwen/Qwen2.5-Omni-3B"
   model_dir: "./cache/Qwen2.5-Omni-3B"
   device_map: "auto"  # cpu, cuda, mps
   torch_type: bfloat16  # opencv, onnxruntime, openvino

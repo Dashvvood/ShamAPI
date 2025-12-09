@@ -19,7 +19,7 @@ run:
 
 log:
   level: "INFO"
-  sink: "log/whisperX.log"
+  sink: "log/whisperx.log"
   rotation: "10 MB"
   retention: "7 days"
   encoding : "utf-8"

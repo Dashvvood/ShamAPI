@@ -1,4 +1,4 @@
-from .. import PROJECT_ROOT
+from .. import RTMLIB_CONFIG_PATH
 from loguru import logger;logger.remove()
 
 import os
@@ -13,12 +13,12 @@ from utils.api_process import get_client_info
 from utils.vision_process import fetch_image, fetch_video, fetch_video_generator
 
 
-config = OmegaConf.load(os.path.join(PROJECT_ROOT, "config/rtmlib.yaml"))
+config = OmegaConf.load(RTMLIB_CONFIG_PATH)
 logger.add(**config["log"])
-
 model = Wholebody(**config["model"])
 app = FastAPI(title="HPE", version=0.1)
 logger.info("Model loaded.")
+
 
 @app.get("/")  
 async def index(client_info: Dict = Depends(get_client_info)):
@@ -156,3 +156,8 @@ async def predict_video_stream(
     client_info: Dict = Depends(get_client_info)
 ):
     pass
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host=config["app"]["host"], port=config["app"]["port"])

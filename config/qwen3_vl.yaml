@@ -1,25 +1,21 @@
 # case
 # useless if using gunicorn with uvicorn workers
 app:
-  name: whisperX
+  name: rtmlib
   host: "0.0.0.0"
   port: 8000
   workers: 1
   reload: True
 
 model:
-  whisper_arch: "large-v3"
-  device: "cuda"
-  download_root: "./cache/"
-  compute_type: "float16"
-  local_files_only: False
-
-run:
-  batch_size: 8
+  repo_id: "Qwen/Qwen3-VL-2B-Instruct"
+  model_dir: "./cache/Qwen3-VL-2B-Instruct"
+  device_map: "auto"  # cpu, cuda, mps
+  torch_type: bfloat16  # opencv, onnxruntime, openvino
 
 log:
   level: "INFO"
-  sink: "log/whisperX.log"
+  sink: "log/qwen25_omni.log"
   rotation: "10 MB"
   retention: "7 days"
   encoding : "utf-8"
@@ -28,4 +24,5 @@ log:
   diagnose: False
   colorize: True
   format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {process} | {message}"
+
 

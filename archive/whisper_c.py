@@ -1,11 +1,11 @@
-from .. import PROJECT_ROOT
+from common import PROJECT_ROOT
 from elinor import o_d; o_d = o_d()
-
 import os
 import json
 import base64
 import requests
 import argparse
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input", type=str, default="./data/dummy/audio1.mp3", help="Path to input audio file.")
@@ -21,16 +21,18 @@ message = {
     "audio": "data:audio/mp3;base64," + audio_b64,
     "language": "en"
 }
+
 response = requests.post(args.url, json=message)
 
 output_path = os.path.join(
     PROJECT_ROOT, 
     "output", 
-    f"whisper_{o_d.strftime("%Y%m%d-%H%M%S")}.json"
+    f"{__file__}_{o_d.strftime("%Y%m%d-%H%M%S")}.json"
 )
 
 with open(output_path, "w") as f:
     json.dump(response.json(), f, indent=4)
+    print(f"Transcription saved to {output_path}")
 
 print(response.json().keys())
-print(f"Result saved to {output_path}")
+
