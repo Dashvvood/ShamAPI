@@ -105,6 +105,7 @@ async def chat(
         logger.info(f"IP: {client_info['ip']}; Time: {processed_time}s")
         res = {
             "api": "/chat",
+            "model": config["model"]["repo_id"],
             "model_output": {
                 "text": output_text[0]
             },
