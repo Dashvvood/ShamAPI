@@ -7,6 +7,10 @@ authors = [
     { name = "Dashvvood", email = "780966523@qq.com" }
 ]
 requires-python = ">=3.12"
+
+[project.scripts]
+shamapi = "start:main"
+
 # 基础依赖
 dependencies = [
     "tqdm",

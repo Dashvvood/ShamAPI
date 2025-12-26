@@ -1,7 +1,21 @@
 # RTFM -> http://docs.gunicorn.org/en/latest/settings.html#settings
 import os
+import sys
 
-pidfile = 'app.pid'
+
+# Extract service name from app argument (e.g., "app.qwen3_vl.server:app" -> "qwen3_vl")
+service_name = 'app'
+for arg in sys.argv:
+    if arg.startswith('app.') and '.server:app' in arg:
+        # Extract the part between "app." and ".server"
+        parts = arg.split('.')
+        if len(parts) >= 3 and parts[0] == 'app':
+            service_name = parts[1]  # e.g., "qwen3_vl"
+            break
+
+# Don't set pidfile here, we'll set it dynamically in on_starting using the actual PID
+pidfile = f"{service_name}_{os.getpid()}.pid"
+print(f"{pidfile = }")
 worker_class = "uvicorn.workers.UvicornWorker"
 bind = '0.0.0.0:8000'
 workers = 1
@@ -14,8 +28,10 @@ def on_starting(server):
     """
     Attach a set of IDs that can be temporarily re-used.
     Used on reloads when each worker exists twice.
+    Also, set pidfile to use the actual process ID.
     """
     server._worker_id_overload = set()
+
  
  
 def nworkers_changed(server, new_value, old_value):

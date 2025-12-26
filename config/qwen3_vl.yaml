@@ -15,7 +15,7 @@ model:
 
 log:
   level: "INFO"
-  sink: "log/qwen25_omni.log"
+  sink: "log/qwen3_vl.log"
   rotation: "10 MB"
   retention: "7 days"
   encoding : "utf-8"
@@ -24,5 +24,3 @@ log:
   diagnose: False
   colorize: True
   format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {process} | {message}"
-
-
