@@ -1,0 +1,26 @@
+# case
+# useless if using gunicorn with uvicorn workers
+app:
+  name: rtmlib
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1
+  reload: True
+
+model:
+  repo_id: "Qwen/Qwen3-VL-8B-Instruct"
+  model_dir: "./cache/Qwen3-VL-8B-Instruct"
+  device_map: "auto"  # cpu, cuda, mps
+  torch_type: bfloat16  # opencv, onnxruntime, openvino
+
+log:
+  level: "INFO"
+  sink: "log/qwen3_vl.log"
+  rotation: "10 MB"
+  retention: "7 days"
+  encoding : "utf-8"
+  enqueue: True
+  backtrace: True
+  diagnose: False
+  colorize: True
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {process} | {message}"

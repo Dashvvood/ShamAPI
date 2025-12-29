@@ -2,8 +2,8 @@
 import os
 import sys
 
-
-# Extract service name from app argument (e.g., "app.qwen3_vl.server:app" -> "qwen3_vl")
+# Extract service name from app argument 
+# (e.g., "app.qwen3_vl.server:app" -> "qwen3_vl")
 service_name = 'app'
 for arg in sys.argv:
     if arg.startswith('app.') and '.server:app' in arg:
@@ -12,10 +12,9 @@ for arg in sys.argv:
         if len(parts) >= 3 and parts[0] == 'app':
             service_name = parts[1]  # e.g., "qwen3_vl"
             break
-
-# Don't set pidfile here, we'll set it dynamically in on_starting using the actual PID
 pidfile = f"{service_name}_{os.getpid()}.pid"
 print(f"{pidfile = }")
+
 worker_class = "uvicorn.workers.UvicornWorker"
 bind = '0.0.0.0:8000'
 workers = 1
