@@ -1,11 +1,13 @@
 # case
 # useless if using gunicorn with uvicorn workers
+# START: ignore here if using gunicorn
 app:
   name: rtmlib
   host: "0.0.0.0"
-  port: 17701
+  port: 8000
   workers: 1
   reload: True
+# END: ignore here if using gunicorn
 
 model:
   repo_id: "Qwen/Qwen3-VL-8B-Instruct"
