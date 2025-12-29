@@ -4,7 +4,7 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(PROJECT_ROOT))
 
-config_dir =os.environ.get("CONFIG", "development")
+config_dir =os.environ.get("CONFIG", "development").lower()
 print(f"{config_dir = }")
 
 WHISPER_CONFIG_PATH = os.path.join(PROJECT_ROOT, 
