@@ -2,6 +2,7 @@
 import base64
 import copy
 from io import BytesIO
+from nt import execv
 from typing import Optional, Union, Tuple, List, Any, Dict
 from concurrent.futures import ThreadPoolExecutor
 import requests
@@ -162,7 +163,11 @@ def read_video_moviepy_generator(video_path: str, target_fps: int = 25):
         
         # 调整帧率
         if target_fps < original_fps:
-            clip = clip.with_fps(target_fps)
+            try:
+                clip = clip.with_fps(target_fps)
+            except (AttributeError, TypeError):
+                # Fallback for older MoviePy versions
+                clip = clip.set_fps(target_fps)
             actual_fps = target_fps
         else:
             actual_fps = original_fps
