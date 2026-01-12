@@ -137,7 +137,7 @@ def fetch_video(message):
     return frames, timestamps, actual_fps, duration
 
 
-def read_video_moviepy_generator(video_path: str, target_fps: int = 25):
+def read_video_moviepy_generator(video_path: str, target_fps=None):
     """
     使用MoviePy库以生成器方式读取视频帧和时间戳
     
@@ -160,16 +160,10 @@ def read_video_moviepy_generator(video_path: str, target_fps: int = 25):
         original_fps = clip.fps
         duration = clip.duration
         
-        # 调整帧率
-        if target_fps < original_fps:
-            try:
-                clip = clip.with_fps(target_fps)
-            except (AttributeError, TypeError):
-                # Fallback for older MoviePy versions
-                clip = clip.set_fps(target_fps)
-            actual_fps = target_fps
-        else:
-            actual_fps = original_fps
+        if target_fps is not None:
+            clip = clip.with_fps(target_fps)
+        
+        actual_fps = clip.fps
         
         logger.debug(f"视频信息: {original_fps}fps -> {actual_fps}fps, 时长: {duration:.2f}秒")
         
