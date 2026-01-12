@@ -161,9 +161,14 @@ def read_video_moviepy_generator(video_path: str, target_fps=None):
         duration = clip.duration
         
         if target_fps is not None:
-            clip = clip.with_fps(target_fps)
-        
-        actual_fps = clip.fps
+            try:
+                clip = clip.with_fps(target_fps)
+            except (AttributeError, TypeError):
+                # Fallback for older MoviePy versions
+                clip = clip.set_fps(target_fps)
+            actual_fps = target_fps
+        else:
+            actual_fps = original_fps
         
         logger.debug(f"视频信息: {original_fps}fps -> {actual_fps}fps, 时长: {duration:.2f}秒")
         
