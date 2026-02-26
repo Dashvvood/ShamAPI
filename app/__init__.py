@@ -17,3 +17,7 @@ QWEN25_OMNI_CONFIG_PATH = os.path.join(PROJECT_ROOT,
     f"config/{config_dir}/qwen25_omni.yaml")
 QWEN3_VL_CONFIG_PATH = os.path.join(PROJECT_ROOT, 
     f"config/{config_dir}/qwen3_vl.yaml")
+
+
+
+from .qwen3_vl.server import app as qwen3_vl
