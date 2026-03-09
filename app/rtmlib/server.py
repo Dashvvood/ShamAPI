@@ -51,11 +51,11 @@ async def predict_image(
     logger.info(f"IP: {client_info['ip']}; Time: {processed_time}s")
     return {
         "api": "/image",
+        "processed_time": processed_time,
         "model_output": {
             "keypoints": keypoints.tolist(),
             "scores": scores.tolist()
         },
-        "processed_time": processed_time,
     }
 
 
@@ -98,8 +98,8 @@ async def predict_video(
         "fps": actual_fps,
         "duration": duration,
         "num_frames": len(res),
-        "model_output": res,
         "processed_time": processed_time,
+        "model_output": res,
     }
 
 @app.post("/video/v1")
@@ -144,8 +144,8 @@ async def predict_video_v1(
         "fps": actual_fps,
         "duration": duration,
         "nframes": len(frames),
-        "model_output": res,
         "processed_time": processed_time,
+        "model_output": res,
     }
 
 
