@@ -25,20 +25,38 @@ max_requests = 1000
 max_requests_jitter = 100
 
 
+def get_allowed_gpu_indices():
+    """
+    从 CUDA_VISIBLE_DEVICES 解析允许使用的 GPU 索引。
+    返回: frozenset[int] 或 None。None 表示不限制（使用全部 GPU）。
+    """
+    val = os.environ.get("CUDA_VISIBLE_DEVICES", "").strip()
+    if not val:
+        return None
+    indices = []
+    for part in val.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            indices.append(int(part))
+        except ValueError:
+            print(f"Warning: Invalid CUDA_VISIBLE_DEVICES segment '{part}', skipped")
+    return frozenset(indices) if indices else None
+
+
 def get_gpu_memory_info():
     """
     获取所有 GPU 的显存信息
     返回: List[Dict] 每个字典包含 {'index': int, 'total': int, 'used': int, 'free': int}
     """
     try:
-        # 使用 nvidia-smi 获取 GPU 信息
         result = subprocess.run(
             ['nvidia-smi', '--query-gpu=index,memory.total,memory.used,memory.free', '--format=csv,nounits,noheader'],
             capture_output=True,
             text=True,
             check=True
         )
-        
         gpu_info = []
         for line in result.stdout.strip().split('\n'):
             if not line.strip():
@@ -57,27 +75,30 @@ def get_gpu_memory_info():
         return []
 
 
-def select_gpu_with_most_free_memory(exclude_indices=None):
+def select_gpu_with_most_free_memory(exclude_indices=None, allowed_indices=None):
     """
-    选择空闲显存最大的 GPU
+    每次调用时实时查询显存，在允许的 GPU 中选出空闲显存最大的一个。
     Args:
-        exclude_indices: 要排除的 GPU 索引列表
+        exclude_indices: 已分配给其他 worker 的 GPU 索引，不再参与选择
+        allowed_indices: 仅在 CUDA_VISIBLE_DEVICES 范围内的 GPU 索引；None 表示不限制
     Returns:
-        GPU 索引，如果没有可用 GPU 则返回 None
+        选中的 GPU 物理索引，若无可用则返回 None
     """
     exclude_indices = exclude_indices or []
     gpu_info = get_gpu_memory_info()
-    
     if not gpu_info:
         return None
-    
-    # 过滤掉已分配的 GPU
-    available_gpus = [gpu for gpu in gpu_info if gpu['index'] not in exclude_indices]
-    
+
+    # 1. 严格按照 CUDA_VISIBLE_DEVICES 范围筛选
+    if allowed_indices is not None:
+        gpu_info = [g for g in gpu_info if g['index'] in allowed_indices]
+
+    # 2. 排除已分配的 GPU
+    available_gpus = [g for g in gpu_info if g['index'] not in exclude_indices]
     if not available_gpus:
         return None
-    
-    # 按空闲显存降序排序，选择最大的
+
+    # 3. 选空闲显存最大的
     best_gpu = max(available_gpus, key=lambda x: x['free'])
     return best_gpu['index']
 
@@ -129,13 +150,13 @@ def on_reload(server):
 def pre_fork(server, worker):
     """
     Attach the next free worker_id before forking off.
-    Allocate GPU with most free memory to this worker.
+    逐个创建 worker，每次在 CUDA_VISIBLE_DEVICES 范围内选空闲显存最大的显卡。
     """
     worker._worker_id = _next_worker_id(server)
-    
-    # 选择空闲显存最大的 GPU
+
+    allowed = get_allowed_gpu_indices()
     exclude_gpus = list(server._allocated_gpus.values())
-    selected_gpu = select_gpu_with_most_free_memory(exclude_gpus)
+    selected_gpu = select_gpu_with_most_free_memory(exclude_indices=exclude_gpus, allowed_indices=allowed)
     
     if selected_gpu is not None:
         server._allocated_gpus[worker._worker_id] = selected_gpu
