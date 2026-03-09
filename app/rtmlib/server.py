@@ -66,7 +66,7 @@ async def predict_video(
 ):
     """
     message = {
-        "video_url": "https://example.com/video.mp4"
+        "video": "https://example.com/video.mp4"
     }
     """
     logger.info(f"Endpoint: /video, IP: {client_info['ip']}; ")
@@ -140,7 +140,7 @@ async def predict_video_v1(
     logger.info(f"IP: {client_info['ip']}; Time: {processed_time}s")
 
     return {
-        "api": "/video",
+        "api": "/video/v1",
         "fps": actual_fps,
         "duration": duration,
         "nframes": len(frames),
@@ -157,6 +157,19 @@ async def predict_video_stream(
 ):
     pass
 
+
+@app.post("/video/draw")
+async def draw(
+    message: Dict,
+    client_info: Dict = Depends(get_client_info)
+):
+    """
+    message = {
+        "video_url": "https://example.com/video.mp4",
+        "keypoints": [[x, y, score], [x, y, score], ...],
+    }
+    """
+    pass
 
 if __name__ == "__main__":
     import uvicorn

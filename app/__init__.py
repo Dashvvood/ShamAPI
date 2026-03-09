@@ -19,5 +19,14 @@ QWEN3_VL_CONFIG_PATH = os.path.join(PROJECT_ROOT,
     f"config/{config_dir}/qwen3_vl.yaml")
 
 
-
-from .qwen3_vl.server import app as qwen3_vl
+def __getattr__(name: str):
+    """懒加载：只有被访问时才导入对应模块，避免加载不需要的重型依赖。"""
+    match name:
+        case "qwen3_vl":
+            from .qwen3_vl.server import app
+            return app
+        case "rtmlib":
+            from .rtmlib.server import app
+            return app
+        case _:
+            raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
