@@ -7,6 +7,8 @@ app:
   workers: 1
   reload: True
 
+sub_workers: 2
+
 model:
   device: "cuda"  # cpu, cuda, mps
   backend: "onnxruntime"  # opencv, onnxruntime, openvino

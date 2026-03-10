@@ -190,7 +190,7 @@ def read_video_moviepy_generator(video_path: str, target_fps=None):
 # custom, no patching
 def fetch_video_generator(message):
     video = message.get("video") or message.get("video_url")
-    fps = message.get("fps", 25)
+    fps = message.get("fps", None)
     if video.startswith("http://") or video.startswith("https://"):
         video_path = download_video(video)
     elif video.startswith("file://"):

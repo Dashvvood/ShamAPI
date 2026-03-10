@@ -4,6 +4,7 @@ from loguru import logger;logger.remove()
 import os
 import time
 import numpy as np
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict, Any
 from omegaconf import OmegaConf
 
@@ -15,9 +16,26 @@ from utils.vision_process import fetch_image, fetch_video, fetch_video_generator
 
 config = OmegaConf.load(RTMLIB_CONFIG_PATH)
 logger.add(**config["log"])
-model = Wholebody(**config["model"])
+
+sub_workers = config["sub_workers"]
+models = [Wholebody(**config["model"]) for _ in range(sub_workers)]
+
+
+def _process_frame(frame_idx: int, frame, timestamp: float) -> Dict:
+    """处理单帧，按 frame_idx % sub_workers 选择 model 以实现并行。"""
+    model_idx = frame_idx % sub_workers
+    img = np.array(frame, np.uint8)
+    keypoints, scores = models[model_idx](img)
+    return {
+        "frame_idx": frame_idx,
+        "timestamp": timestamp,
+        "keypoints": keypoints.tolist(),
+        "scores": scores.tolist(),
+    }
+
+
 app = FastAPI(title="HPE", version=0.1)
-logger.info("Model loaded.")
+logger.info(f"Model loaded. {sub_workers} workers.")
 
 
 @app.get("/")  
@@ -45,7 +63,7 @@ async def predict_image(
     image = fetch_image(message)
     img = np.array(image, np.uint8)
 
-    keypoints, scores = model(img)
+    keypoints, scores = models[0](img)
     toc = time.time()
     processed_time = round(toc - tic, 4)
     logger.info(f"IP: {client_info['ip']}; Time: {processed_time}s")
@@ -72,22 +90,19 @@ async def predict_video(
     logger.info(f"Endpoint: /video, IP: {client_info['ip']}; ")
 
     tic = time.time()
-    res = []
     frame_generator, actual_fps, duration = fetch_video_generator(message)
-    logger.info(f"Processing video at {actual_fps} fps, duration: {duration:.2f} seconds")
+    frames_data = [(i, frame, timestamp) for i, (frame, timestamp) in enumerate(frame_generator)]
+    logger.info(f"Processing {len(frames_data)} frames at {actual_fps} fps, duration: {duration:.2f} seconds")
 
-    for i, (frame, timestamp) in enumerate(frame_generator):
-        img = np.array(frame, np.uint8)
-        keypoints, scores = model(img)
-        # Here you can store or process the keypoints and scores as needed
-        res.append(
-            {
-                "frame_idx": i,
-                "timestamp": timestamp,
-                "keypoints": keypoints.tolist(),
-                "scores": scores.tolist()
-            }
-        )
+    if sub_workers > 1:
+        res = []
+        with ThreadPoolExecutor(max_workers=sub_workers) as ex:
+            futures = [ex.submit(_process_frame, i, frame, ts) for i, frame, ts in frames_data]
+            for future in as_completed(futures):
+                res.append(future.result())
+        res.sort(key=lambda x: x["frame_idx"])
+    else:
+        res = [_process_frame(i, frame, ts) for i, frame, ts in frames_data]
 
     toc = time.time()
     processed_time = round(toc - tic, 4)
@@ -98,52 +113,6 @@ async def predict_video(
         "fps": actual_fps,
         "duration": duration,
         "num_frames": len(res),
-        "processed_time": processed_time,
-        "model_output": res,
-    }
-
-@app.post("/video/v1")
-async def predict_video_v1(
-    message: Dict,
-    client_info: Dict = Depends(get_client_info)
-):
-    """
-    message = {
-        "video_url": "https://example.com/video.mp4"
-    }
-    """
-    logger.info(f"Endpoint: /video, IP: {client_info['ip']}; ")
-
-    tic = time.time()
-    res = []
-    frames, timestamps, actual_fps, duration = fetch_video(message)
-    
-    logger.info(f"Processing {len(frames)} frames at {actual_fps} fps, duration: {duration:.2f} seconds")
-
-
-    for i, (frame, timestamp) in enumerate(zip(frames, timestamps)):
-        img = np.array(frame, np.uint8)
-        keypoints, scores = model(img)
-        # Here you can store or process the keypoints and scores as needed
-        res.append(
-            {
-                "frame_idx": i,
-                "timestamp": timestamp,
-                "keypoints": keypoints.tolist(),
-                "scores": scores.tolist()
-            }
-        )
-        frame_id += 1
-
-    toc = time.time()
-    processed_time = round(toc - tic, 4)
-    logger.info(f"IP: {client_info['ip']}; Time: {processed_time}s")
-
-    return {
-        "api": "/video/v1",
-        "fps": actual_fps,
-        "duration": duration,
-        "nframes": len(frames),
         "processed_time": processed_time,
         "model_output": res,
     }
