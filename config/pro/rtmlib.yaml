@@ -7,7 +7,7 @@ app:
   workers: 1
   reload: True
 
-sub_workers: 2
+sub_workers: 6
 
 model:
   device: "cuda"  # cpu, cuda, mps
