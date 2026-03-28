@@ -1,4 +1,3 @@
-from .. import PROJECT_ROOT
 from elinor import o_d; o_d = o_d()
 import os
 import json
@@ -7,7 +6,7 @@ import requests
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-i", "--input", type=str, default="./data/dummy/audio1.mp3", help="Path to input audio file.")
+parser.add_argument("-i", "--input", type=str, default="./data/dummy/video01.mp4", help="Path to input audio file.")
 parser.add_argument("--url", type=str, default="http://127.0.0.1:8000/chat", help="URL of the transcription service.")
 args = parser.parse_args()
 
@@ -44,11 +43,7 @@ message = {
 
 response = requests.post(args.url, json=message)
 
-output_path = os.path.join(
-    PROJECT_ROOT, 
-    "output", 
-    f"qwen3_vl_{o_d.strftime("%Y%m%d-%H%M%S")}.json"
-)
+output_path = f"qwen3_vl_{o_d.strftime("%Y%m%d-%H%M%S")}.json"
 
 with open(output_path, "w") as f:
     json.dump(response.json(), f, indent=4, ensure_ascii=False)
