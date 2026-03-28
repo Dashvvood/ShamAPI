@@ -60,14 +60,13 @@ if not response.ok:
     print(body, file=sys.stderr)
     sys.exit(response.status_code)
 
-output_path = f"qwen3_{o_d.strftime('%Y%m%d-%H%M%S')}.json"
-out_dir = os.environ.get("QWEN3_CLIENT_OUT_DIR", ".")
-os.makedirs(out_dir, exist_ok=True)
-output_path = os.path.join(out_dir, os.path.basename(output_path))
+# output_path = f"qwen3_{o_d.strftime('%Y%m%d-%H%M%S')}.json"
+# out_dir = os.environ.get("QWEN3_CLIENT_OUT_DIR", ".")
+# os.makedirs(out_dir, exist_ok=True)
+# output_path = os.path.join(out_dir, os.path.basename(output_path))
 
-with open(output_path, "w", encoding="utf-8") as f:
-    json.dump(body, f, indent=4, ensure_ascii=False)
+# with open(output_path, "w", encoding="utf-8") as f:
+#     json.dump(body, f, indent=4, ensure_ascii=False)
 
 print(body)
 print(body.keys())
-print(f"Result saved to {output_path}")
