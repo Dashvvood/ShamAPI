@@ -15,13 +15,14 @@ from moviepy.editor import VideoFileClip
 
 
 def to_rgb(pil_image: Image.Image) -> Image.Image:
-      if pil_image.mode == 'RGBA':
-          white_background = Image.new("RGB", pil_image.size, (255, 255, 255))
-          white_background.paste(pil_image, mask=pil_image.split()[3])  # Use alpha channel as mask
-          return white_background
-      else:
-          return pil_image.convert("RGB")
-      
+    if pil_image.mode == 'RGBA':
+        white_background = Image.new("RGB", pil_image.size, (255, 255, 255))
+        white_background.paste(pil_image, mask=pil_image.split()[3])  # Use alpha channel as mask
+        return white_background
+    else:
+        return pil_image.convert("RGB")
+
+
 def fetch_image(ele: Dict[str, Union[str, Image.Image]]) -> Image.Image:
     if "image" in ele:
         image = ele["image"]
@@ -118,7 +119,7 @@ def read_video_moviepy(video_path: str, target_fps: int = 25) -> Tuple[List[np.n
         
     except Exception as e:
         raise ValueError(f"MoviePy读取失败: {e}")
-    
+
 
 # custom, no patching
 def fetch_video(message):
@@ -186,7 +187,8 @@ def read_video_moviepy_generator(video_path: str, target_fps=None):
 
     except Exception as e:
         raise ValueError(f"MoviePy读取失败: {e}")
-    
+
+
 # custom, no patching
 def fetch_video_generator(message):
     video = message.get("video") or message.get("video_url")
