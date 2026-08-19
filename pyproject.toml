@@ -18,22 +18,16 @@ dependencies = [
     "omegaconf",
     "ipywidgets",
     "concurrent-log-handler",
+    "openai",
+    "litellm[proxy]",
 ]
 
-
-# 默认添加的额外依赖组
-[tool.uv]
-default-groups = ["dev"]
-
-# 依赖组所需的特殊Python版本,要求比上方的基础依赖更高的Python版本时需要单独指定
-[tool.uv.dependency-groups]
-whisper = {requires-python = ">=3.12"}
-
-[dependency-groups]
-dev = [
-    "pytest",
-]
-
+# 可选功能 / 服务依赖（extras）
+# 安装示例:
+#   uv sync --extra qwen
+#   uv sync --extra whisper --extra vllm
+#   pip install -e ".[qwen,web]"
+[project.optional-dependencies]
 audio = [
     "audioread",
     "librosa",
@@ -41,15 +35,15 @@ audio = [
 
 web = [
     "aiohttp",
-    "fastapi",
+    # litellm proxy needs get_flat_dependant (removed in fastapi>=0.140.10)
+    "fastapi>=0.136.3,<=0.140.2",
     "gunicorn",
     "requests",
     "uvicorn",
 ]
 
 qwen = [
-    {include-group = "audio"},
-    {include-group = "web"},
+    "ShamAPI[audio,web]",
     "accelerate>=1.11.0",
     "modelscope>=1.35.2",
     "qwen-omni-utils>=0.0.8",
@@ -60,9 +54,7 @@ qwen = [
 ]
 
 whisper = [
-    {include-group = "audio"},
-    {include-group = "web"},
-    # "ctranslate2==4.5.0",
+    "ShamAPI[audio,web]",
     "openai-whisper>=20250625",
     "torch==2.8.0",
     "torchaudio==2.8.0",
@@ -71,7 +63,7 @@ whisper = [
 ]
 
 rtmlib = [
-    {include-group = "web"},
+    "ShamAPI[web]",
     "moviepy>=1.0.3",
     "onnxruntime-gpu>=1.23.2",
     "opencv-contrib-python>=4.12.0.88",
@@ -85,3 +77,18 @@ vllm = [
     "vllm>=0.11.0",
 ]
 
+# 开发依赖（PEP 735）；默认随 uv sync 安装
+[tool.uv]
+default-groups = ["dev"]
+
+[dependency-groups]
+dev = [
+    "pytest",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["test"]
+markers = [
+    "integration: needs a running server (e.g. ./run.sh)",
+]

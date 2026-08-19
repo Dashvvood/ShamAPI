@@ -1,11 +1,11 @@
 app:
-  name: qwen3_vl
+  name: qwen3_5
   host: "0.0.0.0"
-  port: 8002
+  port: 8001
 
 model:
-  repo_id: "Qwen/Qwen3-VL-2B-Instruct"
-  model_dir: "./cache/Qwen3-VL-2B-Instruct"
+  repo_id: "Qwen/Qwen3.5-2B"
+  model_dir: "./cache/Qwen3.5-2B"
   device_map: "auto"
   torch_type: bfloat16
 
@@ -14,7 +14,7 @@ run:
 
 log:
   level: "INFO"
-  sink: "log/qwen3_vl.log"
+  sink: "log/qwen3_5.log"
   rotation: "10 MB"
   retention: "7 days"
   encoding: "utf-8"

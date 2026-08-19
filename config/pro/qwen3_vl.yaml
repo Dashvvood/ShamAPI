@@ -1,26 +1,23 @@
-# case
-# useless if using gunicorn with uvicorn workers
-# START: ignore here if using gunicorn
 app:
   name: qwen3_vl
   host: "0.0.0.0"
-  port: 8000
-  workers: 1
-  reload: True
-# END: ignore here if using gunicorn
+  port: 8002
 
 model:
-  repo_id: "Qwen/Qwen3-VL-8B-Instruct"
-  model_dir: "./cache/Qwen3-VL-8B-Instruct"
-  device_map: "auto"  # cpu, cuda, mps
-  torch_type: bfloat16  # opencv, onnxruntime, openvino
+  repo_id: "Qwen/Qwen3-VL-2B-Instruct"
+  model_dir: "./cache/Qwen3-VL-2B-Instruct"
+  device_map: "auto"
+  torch_type: bfloat16
+
+run:
+  max_new_tokens: 512
 
 log:
   level: "INFO"
   sink: "log/qwen3_vl.log"
   rotation: "10 MB"
   retention: "7 days"
-  encoding : "utf-8"
+  encoding: "utf-8"
   enqueue: True
   backtrace: True
   diagnose: False

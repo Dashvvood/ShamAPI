@@ -224,3 +224,6 @@ output/
 
 *.pid
 uv.lock
+.cursor
+log/*
+!log/.gitkeep
